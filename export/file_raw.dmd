@@ -1,0 +1,111 @@
+```set template default.html```
+```set title file_raw cheat sheet```
+```set autoapi ext```
+```set intro
+This is a "cheat sheet" for "Raw file functions" extension by YellowAfterlife.
+The extension can be found on [itch.io](https://yellowafterlife.itch.io/gamemaker-raw-file).
+```
+#[General functions](cat-general) {
+	#[file_raw_is_available()->success?]() {
+		Returns whether the DLL loaded up fine.
+	}
+	#[file_raw_open(path, mode)->rawfile_ind]() {
+		Tries to open a file. Returns file index or -1 if the file could not be opened.
+		
+		If `path` is relative, the extension will look for the file in the game's save directory.
+		
+		Mode is as per [MSDN](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/fopen-wfopen?view=vs-2019).
+		
+		Examples:
+		```
+		var a_file = file_raw_open("some.bin", "wb"); // binary for writing
+		file_raw_write_u8(a_file, 100);
+		file_raw_write_string(a_file, "hello!");
+		file_raw_close(a_file);
+		
+		var a_file = file_raw_open("some.bin", "rb"); // binary for reading
+		var a_byte = file_raw_read_u8(a_file); // 100
+		var a_string = file_raw_read_string(a_file); // "hello!"
+		file_raw_close(a_file);
+		```
+	}
+	#[file_raw_flush(rawfile_ind)]() {
+		Ensures that any file changes are finalized on disk.
+		
+		Native: [fflush](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/fflush)
+	}
+	#[file_raw_close(rawfile_ind)->success?]() {
+		Closes a previously open raw file, returning whether successful.
+	}
+	#[file_raw_exists(rawfile_ind)->valid?]() {
+		Returns whether a `file_raw` index is currently in use.
+		
+		Note that the extension will reuse file indexes, so having "if file exists then close file" will result in [familiar problems](https://yal.cc/gamemaker-quality-structures/#prob-destroyed).
+	}
+}
+#[Position functions](cat-pos) {
+	#[file_raw_rewind(rawfile_ind)]() {
+		Repositions to the beginning of a file.
+		
+		Native: [rewind](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/rewind)
+	}
+	#[file_raw_tell(rawfile_ind)]() {
+		Returns the current file position.
+		
+		Native: [ftell](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/ftell-ftelli64)
+	}
+	#[file_raw_seek(rawfile_ind, origin, pos)]() {
+		Moves the file pointer. Origin can be:
+		--{
+		--	`file_raw_seek_end`
+		--	`file_raw_seek_relative`
+		--	`file_raw_seek_start`
+		}
+		Native: [fseek](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/fseek-fseeki64)
+	}
+	#[file_raw_eof(rawfile_ind)]() {
+		Returns whether end-of-file is reached.
+		
+		Native: [feof](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/feof)
+	}
+}
+#[Data functions](cat-data) {
+	There's nothing particular about most of these.
+	
+	Unsigned:
+	#[file_raw_read_u8(rawfile_ind)]() {}
+	#[file_raw_read_u16(rawfile_ind)]() {}
+	#[file_raw_read_u32(rawfile_ind)]() {}
+	#[file_raw_write_u8(rawfile_ind, val)]() {}
+	#[file_raw_write_u16(rawfile_ind, val)]() {}
+	#[file_raw_write_u32(rawfile_ind, val)]() {}
+	Signed:
+	#[file_raw_read_s8(rawfile_ind)]() {}
+	#[file_raw_read_s16(rawfile_ind)]() {}
+	#[file_raw_read_s32(rawfile_ind)]() {}
+	#[file_raw_read_s64(rawfile_ind)]() {}
+	#[file_raw_write_s8(rawfile_ind, val)]() {}
+	#[file_raw_write_s16(rawfile_ind, val)]() {}
+	#[file_raw_write_s32(rawfile_ind, val)]() {}
+	#[file_raw_write_s64(rawfile_ind, val)]() {}
+	Floats:
+	#[file_raw_read_f32(rawfile_ind)]() {}
+	#[file_raw_read_f64(rawfile_ind)]() {}
+	#[file_raw_write_f32(rawfile_ind, val)]() {}
+	#[file_raw_write_f64(rawfile_ind, val)]() {}
+	Strings:
+	#[file_raw_write_string(rawfile_ind, val)]() {
+		Writes a UTF8 string to a file, including a 0-terminating byte.
+	}
+	#[file_raw_read_string(rawfile_ind)]() {
+		Reads bytes from the file until it encounters EOF or a 0-byte, then returns it as a string.
+	}
+	#[file_raw_write_chars(rawfile_ind, val)]() {
+		Writes a UTF8 string to a file, not including a 0-terminating byte.
+	}
+	#[file_raw_read_chars(rawfile_ind, count)]() {
+		Reads `count` bytes from a file as a string.
+	}
+	Native: [fread](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/fread),
+		[fwrite](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/fwrite).
+}
